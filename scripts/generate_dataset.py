@@ -3,6 +3,7 @@ import pickle
 
 import pandas as pd
 import torch
+from sklearn.preprocessing import MinMaxScaler
 from torch_geometric.data import Data
 
 if __name__ == '__main__':
@@ -13,26 +14,24 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     args.genes = [
-        'TREX1',
-        'ATM',
-        'ENPP1',
         'C6orf150',
         'CCL5',
         'CXCL10',
         'TMEM173',
         'CXCL9',
         'CXCL11',
-        'TBK1',
+        'NFKB1',
         'IKBKE',
         'IRF3',
-        'IRF7',
-        'IFNA1',
-        'IFNB1',
-        'NFKB1'
+        'TREX1',
+        'ATM'
     ]
     num_genes = len(args.genes)
 
     df = pd.read_csv(args.input_csv)
+    scaler = MinMaxScaler()
+    df[args.genes] = scaler.fit_transform(df[args.genes])
+
     dataset = []
     for _, row in df.iterrows():
         gene_data = torch.tensor(row[:num_genes].values, dtype=torch.float).view(1, -1)

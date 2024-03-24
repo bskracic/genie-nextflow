@@ -1,11 +1,10 @@
-params.cancer_type = "desired_cancer_type"
 params.input_csv_path = "input_data.csv"
+params.clean_data_path = "clean_data.txt"
 params.input_genes = "genes.txt"
 params.target_variable = "DSS"
-params.clean_data_path = "clean_data.txt"
 
-def py_interpreter = "/home/jugo/anaconda3/envs/cgas-sting/bin/python"
-// def py_interpreter = "python3"
+// def py_interpreter = "/home/jugo/anaconda3/envs/cgas-sting/bin/python"
+def py_interpreter = "python3"
 
 process filterRows {
 
