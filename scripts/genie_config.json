@@ -1,0 +1,31 @@
+{
+  "target_variable": "DSS",
+  "genes": [
+    "C6orf150",
+    "CCL5",
+    "CXCL10",
+    "TMEM173",
+    "CXCL9",
+    "CXCL11",
+    "NFKB1",
+    "IKBKE",
+    "IRF3",
+    "TREX1",
+    "ATM"
+  ],
+  "survival_data_path": "/home/jugo/research/genie-nextflow/resources/TCGA_survival_data_clean.txt",
+  "cancers": [
+    {
+      "name": "BRCA",
+      "files": {
+        "expression": "/home/jugo/research/genie-nextflow/resources/BRCA_expression.csv"
+      }
+    },
+    {
+      "name": "LUAD",
+      "files": {
+        "expression": "/home/jugo/research/genie-nextflow/resources/LUAD_expression.csv"
+      }
+    }
+  ]
+}

@@ -3,34 +3,22 @@ import pickle
 
 import pandas as pd
 import torch
-from sklearn.preprocessing import MinMaxScaler
 from torch_geometric.data import Data
+
+from genie_utils import load_config
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate graph dataset')
+    parser.add_argument('--genie_config', required=True, help='Genie json configuration file')
     parser.add_argument('--input_csv', required=True, help='Input CSV file')
     parser.add_argument('--dataset_obj', required=True, help='Output pickle object file')
-    parser.add_argument("--genes", required=True, help='Genes')
     args = parser.parse_args()
 
-    args.genes = [
-        'C6orf150',
-        'CCL5',
-        'CXCL10',
-        'TMEM173',
-        'CXCL9',
-        'CXCL11',
-        'NFKB1',
-        'IKBKE',
-        'IRF3',
-        'TREX1',
-        'ATM'
-    ]
-    num_genes = len(args.genes)
+    config = load_config(args.genie_config)
+    genes = config['genes']
+    num_genes = len(genes)
 
     df = pd.read_csv(args.input_csv)
-    scaler = MinMaxScaler()
-    df[args.genes] = scaler.fit_transform(df[args.genes])
 
     dataset = []
     for _, row in df.iterrows():

@@ -13,7 +13,7 @@ class GraphConvolutionalNetwork(torch.nn.Module):
         self.conv1 = GCNConv(num_node_features, hidden_channels)
         self.lin = Linear(hidden_channels, num_classes)
         self.a = torch.nn.ReLU()
-        self.num_classes = num_classes
+        self.num_classes = num_classes  
 
     def forward(self, batch):
         X = batch

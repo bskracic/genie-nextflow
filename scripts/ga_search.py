@@ -58,7 +58,6 @@ if __name__ == '__main__':
     starting_flat_matrix = np.array(np.random.randint(2, size=(NODES, NODES)), dtype=float).flatten()
     num_solutions = 10
     num_generations = 100
-    graph_size = 11
     ga_instance = pygad.GA(
         num_generations=num_generations,
         mutation_probability=0.7,
@@ -69,7 +68,6 @@ if __name__ == '__main__':
         gene_space=[0, 1],
         initial_population=[starting_flat_matrix.copy() for _ in range(num_solutions)],
         on_generation=generation_finished,
-        # parallel_processing=['thread', 16]
     )
 
     ga_instance.run()
