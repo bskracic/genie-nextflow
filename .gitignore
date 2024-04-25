@@ -40,3 +40,5 @@ plugins-prod
 sandbox
 wave-tests
 nextflow-logs*
+dumps
+cohorts

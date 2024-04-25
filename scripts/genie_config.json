@@ -1,5 +1,4 @@
 {
-  "target_variable": "DSS",
   "genes": [
     "C6orf150",
     "CCL5",
@@ -14,18 +13,21 @@
     "ATM"
   ],
   "survival_data_path": "/home/jugo/research/genie-nextflow/resources/TCGA_survival_data_clean.txt",
-  "cancers": [
-    {
-      "name": "BRCA",
-      "files": {
-        "expression": "/home/jugo/research/genie-nextflow/resources/BRCA_expression.csv"
-      }
+  "cancers": {
+    "BRCA": {
+      "expression": "/home/jugo/research/genie-nextflow/resources/BRCA_expression.csv"
     },
-    {
-      "name": "LUAD",
-      "files": {
-        "expression": "/home/jugo/research/genie-nextflow/resources/LUAD_expression.csv"
-      }
+    "LUAD": {
+      "expression": "/home/jugo/research/genie-nextflow/resources/LUAD_expression.csv"
+    },
+    "KIRC": {
+      "expression": "/home/jugo/research/genie-nextflow/resources/KIRC_expression.csv"
+    },
+    "LUNG": {
+      "expression": "/home/jugo/research/genie-nextflow/resources/LUNG_expression.csv"
+    },
+    "THCA": {
+      "expression": "/home/jugo/research/genie-nextflow/resources/THCA_expression.csv"
     }
-  ]
+  }
 }
