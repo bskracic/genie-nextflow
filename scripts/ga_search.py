@@ -16,7 +16,9 @@ from genie_utils import load_config
 LR = 0.0001
 WD = 1e-1
 HIDDEN_SIZE = 64
-NUM_SOLUTIONS = 4
+EPOCHS = 1
+
+NUM_SOLUTIONS = 2
 NUM_GENERATIONS = 1
 NUM_PARENTS_MATING = 2
 criterion = torch.nn.CrossEntropyLoss()
@@ -61,15 +63,13 @@ if __name__ == '__main__':
             "architecture": "GCN",
             "nodes": NODES,
             "genes": config['genes'],
-            "epochs": 10,
+            "epochs": EPOCHS,
         }
     )
 
 
-    def epoch_finished(a, b, c):
-        # print('#', end='')
+    def epoch_finished(epoch, tr_f1, tr_loss, f1, loss):
         pass
-
 
     def fitness_function(ga: pygad.GA, solution, index):
         adj_matrix = solution.reshape(ADJ_MATRIX_SHAPE)
@@ -77,7 +77,7 @@ if __name__ == '__main__':
                                           adj_matrix=adj_matrix)
         optimizer = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
         trainer = GCNModelTrainer(model=model, optimizer=optimizer, criterion=criterion,
-                                  num_classes=NUM_CLASSES, epochs=10)
+                                  num_classes=NUM_CLASSES, epochs=EPOCHS)
 
         final_f1s = trainer.train(train_loader=train_loader, test_loader=test_loader, on_epoch_finished=epoch_finished)
         print(' =>', np.mean(final_f1s))
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     adj_matrix = best_solution.reshape(NODES, NODES)
 
     run.log(
-        {"adjacency_matrix": adj_matrix,
+        {"adjacency_matrix": adj_matrix.flatten(),
          "graph_figure": wandb.Image(draw_graph(adj_matrix=adj_matrix)),
          'best_f1': best_solution_fitness})
 

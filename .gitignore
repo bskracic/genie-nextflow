@@ -42,3 +42,4 @@ wave-tests
 nextflow-logs*
 dumps
 cohorts
+wandb

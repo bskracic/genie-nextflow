@@ -13,7 +13,7 @@ class GraphConvolutionalNetwork(torch.nn.Module):
         self.conv1 = GCNConv(num_node_features, hidden_channels)
         self.lin = Linear(hidden_channels, num_classes)
         self.a = torch.nn.ReLU()
-        self.num_classes = num_classes  
+        self.num_classes = num_classes
 
     def forward(self, batch):
         X = batch
@@ -44,13 +44,25 @@ class GCNModelTrainer:
 
         epoch_metrics = []
         epoch_losses = []
+
         for epoch in range(self.epochs):
             self.model.train()
+            tr_metrics = []
+            tr_losses = []
             for batch in train_loader:
                 self.optimizer.zero_grad()
                 out = self.model(batch)
                 labels = torch.stack(tuple(data.y for data in batch), dim=1).squeeze(dim=0)
                 loss = self.criterion(out, labels)
+                tr_losses.append(loss.item())
+
+                out_prob = F.softmax(out, dim=1)
+                pred = out_prob.argmax(dim=1)
+                Y = torch.stack(tuple(data.y for data in batch), dim=1).squeeze(dim=0)
+                _, true_labels = Y.max(dim=1)
+                tr_metrics.append(
+                    multiclass_f1_score(pred.detach(), torch.Tensor(true_labels), num_classes=self.num_classes))
+
                 loss.backward()
                 self.optimizer.step()
 
@@ -71,6 +83,6 @@ class GCNModelTrainer:
 
             epoch_metrics.append(np.mean(metrics))
             epoch_losses.append(np.mean(losses))
-            on_epoch_finished(epoch, epoch_metrics[-1], epoch_losses[-1])
+            on_epoch_finished(epoch, np.mean(tr_metrics), np.mean(tr_losses), epoch_metrics[-1], epoch_losses[-1])
 
         return np.mean(epoch_metrics)

@@ -3,7 +3,6 @@ params.target = "DSS"
 params.wandb_api_key = "7378d591fc5cde507d409f0b843f8c0b95a6969b"
 params.cancers = 'BRCA,LUAD'
 
-//def py_interpreter = "/home/jugo/anaconda3/envs/cgas-sting/bin/python"
 def py_interpreter = "python3"
 
 process filterRows {

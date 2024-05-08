@@ -46,9 +46,13 @@ if __name__ == "__main__":
     train_loader = DataListLoader(train_dataset, batch_size=64, shuffle=True)
     test_loader = DataListLoader(test_dataset, batch_size=64, shuffle=True)
 
+    with open("wandb_run_id.txt", "r") as f:
+        run_id = f.read().strip()
+    wandb.login(key=args.wandb_api_key)
+    run = wandb.init(id=run_id, resume="must", project='GENIE-Nextflow')
 
-    def epoch_finished(a, b, c):
-        print('#', end='')
+    def epoch_finished(epoch, tr_f1, tr_loss, f1, loss):
+        run.log({"epoch": epoch, "train_f1": tr_f1, "train_loss": tr_loss, "f1": f1, "loss": loss})
         pass
 
     model = GraphConvolutionalNetwork(num_node_features=1, num_classes=NUM_CLASSES, hidden_channels=HIDDEN_SIZE,
@@ -68,12 +72,6 @@ if __name__ == "__main__":
         'OS': ['OS_1', 'OS_0'],
         'GENDER': ['gender_female', 'gender_male']
     }
-
-    with open("wandb_run_id.txt", "r") as f:
-        run_id = f.read().strip()
-
-    wandb.login(key=args.wandb_api_key)
-    run = wandb.init(id=run_id, resume="allow")
 
     for class_index in range(NUM_CLASSES):
         ig = IntegratedGradients(model)
@@ -101,7 +99,7 @@ if __name__ == "__main__":
             {
                 "class": outputs[args.target][class_index],
                 "attributions": str(feature_importance),
-                "feature_importance_graph": wandb.Image(fig)
+                "feature_importance_graph": wandb.Image(fig, caption=outputs[args.target][class_index])
             })
 
     run.finish()
