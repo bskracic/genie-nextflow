@@ -50,4 +50,4 @@ Check the configuraton in `scripts/genie_config.json`:
 
 Run the nextflow script:
 
-```./nextflow -log nextflow-logs/log run main.nf --genie_config_path=$(pwd)/scripts/genie_config.json --wandb_api_key=<api key> --cancers=<list of cancers>```
+```./nextflow -log nextflow-logs/log run main.nf --genie_config_path=$(pwd)/scripts/genie_config.json --wandb_api_key=<api key> --cancers=<list of cancers> --target=<target>```
