@@ -8,7 +8,9 @@ This repository includes everything required to run GENIE using Nextflow and Doc
 
 Firstly, pull the image:
 
-```docker pull bskracic/genie-runtime:latest```
+```
+docker pull bskracic/genie-runtime:latest
+```
 
 Check the configuraton in `scripts/genie_config.json`:
 
@@ -50,4 +52,6 @@ Check the configuraton in `scripts/genie_config.json`:
 
 Run the nextflow script:
 
-```./nextflow -log nextflow-logs/log run main.nf --genie_config_path=$(pwd)/scripts/genie_config.json --wandb_api_key=<api key> --cancers=<list of cancers> --target=<target>```
+```bash
+./nextflow -log nextflow-logs/log run main.nf --genie_config_path=$(pwd)/scripts/genie_config.json --wandb_api_key=<api key> --cancers=<list of cancers> --target=<target>
+```
