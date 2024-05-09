@@ -15,7 +15,7 @@ from gcn import GraphConvolutionalNetwork, GCNModelTrainer
 LR = 0.0001
 WD = 1e-1
 HIDDEN_SIZE = 64
-EPOCHS = 5
+EPOCHS = 100
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='')

@@ -16,11 +16,11 @@ from genie_utils import load_config
 LR = 0.0001
 WD = 1e-1
 HIDDEN_SIZE = 64
-EPOCHS = 1
+EPOCHS = 10
 
-NUM_SOLUTIONS = 2
-NUM_GENERATIONS = 1
-NUM_PARENTS_MATING = 2
+NUM_SOLUTIONS = 10
+NUM_GENERATIONS = 20
+NUM_PARENTS_MATING = 4
 criterion = torch.nn.CrossEntropyLoss()
 
 if __name__ == '__main__':
