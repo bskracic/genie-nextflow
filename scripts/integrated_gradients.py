@@ -55,15 +55,17 @@ if __name__ == "__main__":
         run.log({"epoch": epoch, "train_f1": tr_f1, "train_loss": tr_loss, "f1": f1, "loss": loss})
         pass
 
-    model = GraphConvolutionalNetwork(num_node_features=1, num_classes=NUM_CLASSES, hidden_channels=HIDDEN_SIZE,
+    model = GraphConvolutionalNetwork(num_node_features=1, num_nodes=NODES, num_classes=NUM_CLASSES, hidden_channels=HIDDEN_SIZE,
                                       adj_matrix=adj_matrix)
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
     trainer = GCNModelTrainer(model=model, optimizer=optimizer, criterion=criterion,
                               num_classes=NUM_CLASSES, epochs=EPOCHS)
     print('training started')
-    trainer.train(train_loader=train_loader, test_loader=test_loader, on_epoch_finished=epoch_finished)
+    final_f1 = trainer.train(train_loader=train_loader, test_loader=test_loader, on_epoch_finished=epoch_finished)
     print('\nfinished')
+
+    run.log({'final_f1': final_f1})
 
     # Maybe refactor this
     outputs: dict = {

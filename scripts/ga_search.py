@@ -23,6 +23,28 @@ NUM_GENERATIONS = 20
 NUM_PARENTS_MATING = 4
 criterion = torch.nn.CrossEntropyLoss()
 
+
+def generate_adjacency_matrix(num_nodes, num_connections):
+    if num_connections > num_nodes * (num_nodes - 1) / 2:
+        raise ValueError("Number of connections exceeds maximum possible for given number of nodes")
+
+    adjacency_matrix = np.zeros((num_nodes, num_nodes), dtype=int)
+
+    # List all possible edges
+    possible_edges = [(i, j) for i in range(num_nodes) for j in range(i + 1, num_nodes)]
+
+    # Randomly choose connections
+    np.random.shuffle(possible_edges)
+    chosen_edges = possible_edges[:num_connections]
+
+    # Fill in the adjacency matrix
+    for edge in chosen_edges:
+        adjacency_matrix[edge[0], edge[1]] = 1
+        adjacency_matrix[edge[1], edge[0]] = 1
+
+    return adjacency_matrix
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Find ')
     parser.add_argument('--genie_config', required=True, help='Genie json configuration file')
@@ -68,25 +90,35 @@ if __name__ == '__main__':
     )
 
 
+    # Use CUDA
+    # if torch.cuda.is_available():
+    #     torch.set_default_device('cuda')
+
     def epoch_finished(epoch, tr_f1, tr_loss, f1, loss):
         pass
 
+
     def fitness_function(ga: pygad.GA, solution, index):
         adj_matrix = solution.reshape(ADJ_MATRIX_SHAPE)
-        model = GraphConvolutionalNetwork(num_node_features=1, num_classes=NUM_CLASSES, hidden_channels=HIDDEN_SIZE,
+        model = GraphConvolutionalNetwork(num_node_features=1, num_nodes=NODES, num_classes=NUM_CLASSES,
+                                          hidden_channels=HIDDEN_SIZE,
                                           adj_matrix=adj_matrix)
+        # model.to('cuda:0')
         optimizer = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
         trainer = GCNModelTrainer(model=model, optimizer=optimizer, criterion=criterion,
                                   num_classes=NUM_CLASSES, epochs=EPOCHS)
 
-        final_f1s = trainer.train(train_loader=train_loader, test_loader=test_loader, on_epoch_finished=epoch_finished)
-        print(' =>', np.mean(final_f1s))
-        return np.mean(final_f1s)
+        final_f1 = trainer.train(train_loader=train_loader, test_loader=test_loader, on_epoch_finished=epoch_finished)
+        print(' =>', final_f1)
+        if final_f1 < 0.8:
+            return final_f1
+        return 0.8 * final_f1 + 0.2 * (1 / solution.sum())
 
 
     def generation_finished(ga: pygad.GA):
         solution, fitness, _ = ga.best_solution()
         print('Generation fitness:', fitness)
+
 
     starting_flat_matrix = np.array(np.random.randint(2, size=(NODES, NODES)), dtype=float).flatten()
     ga_instance = pygad.GA(
@@ -97,9 +129,10 @@ if __name__ == '__main__':
         num_genes=starting_flat_matrix.shape,
         fitness_func=fitness_function,
         gene_space=[0, 1],
-        initial_population=[starting_flat_matrix.copy() for _ in range(NUM_SOLUTIONS)],
+        initial_population=[generate_adjacency_matrix(NODES, NODES).flatten() for _ in range(NUM_SOLUTIONS)],
         on_generation=generation_finished,
     )
+
 
     def draw_graph(adj_matrix) -> plt.Figure:
         fig = plt.figure(figsize=(10, 8))
@@ -125,11 +158,10 @@ if __name__ == '__main__':
     run.log(
         {"adjacency_matrix": adj_matrix.flatten(),
          "graph_figure": wandb.Image(draw_graph(adj_matrix=adj_matrix)),
-         'best_f1': best_solution_fitness})
+         'best_fitness': best_solution_fitness})
 
     with open(args.adj_matrix_obj, 'wb') as fh:
         pickle.dump(adj_matrix, fh)
 
     with open("wandb_run_id.txt", "w") as f:
         f.write(run.id)
-

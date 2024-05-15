@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cancers=('BRCA' 'LUNG' 'LUAD' 'THCA' 'KIRC')
+cancers=('LUNG')
 targets=('DSS' 'OS' 'GENDER' 'STAGE')
 
 for cancer in "${cancers[@]}"; do

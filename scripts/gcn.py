@@ -7,19 +7,20 @@ from torcheval.metrics.functional import multiclass_f1_score
 
 
 class GraphConvolutionalNetwork(torch.nn.Module):
-    def __init__(self, num_node_features, num_classes, hidden_channels, adj_matrix):
+    def __init__(self, num_node_features, num_classes, num_nodes, hidden_channels, adj_matrix):
         super(GraphConvolutionalNetwork, self).__init__()
         self.adj_matrix = adj_matrix
         self.conv1 = GCNConv(num_node_features, hidden_channels)
         self.lin = Linear(hidden_channels, num_classes)
         self.a = torch.nn.ReLU()
         self.num_classes = num_classes
+        self.num_nodes = num_nodes
 
     def forward(self, batch):
         X = batch
         # NE DAO BOG NIKOM
         if isinstance(batch, list):
-            X = torch.stack(tuple(data.x for data in batch)).reshape(shape=(len(batch), 11)).unsqueeze(-1)
+            X = torch.stack(tuple(data.x for data in batch)).reshape(shape=(len(batch), self.num_nodes)).unsqueeze(-1)
 
         edge_index = torch.concat(
             tuple(torch.nonzero(torch.tensor(self.adj_matrix), as_tuple=False).t().contiguous() for _ in
