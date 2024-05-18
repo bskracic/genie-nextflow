@@ -110,9 +110,17 @@ if __name__ == '__main__':
 
         final_f1 = trainer.train(train_loader=train_loader, test_loader=test_loader, on_epoch_finished=epoch_finished)
         print(' =>', final_f1)
-        if final_f1 < 0.8:
-            return final_f1
-        return 0.8 * final_f1 + 0.2 * (1 / solution.sum())
+        # if final_f1 < 0.8:
+        #     return final_f1
+        # return 0.8 * final_f1 + 0.2 * (1 / solution.sum())
+
+        # if solution.sum() > NODES:
+        #     return 0
+        # else:
+        #     return final_f1
+        # return 1 / solution.sum()
+
+        return final_f1
 
 
     def generation_finished(ga: pygad.GA):
@@ -131,6 +139,7 @@ if __name__ == '__main__':
         gene_space=[0, 1],
         initial_population=[generate_adjacency_matrix(NODES, NODES).flatten() for _ in range(NUM_SOLUTIONS)],
         on_generation=generation_finished,
+        mutation_type="scramble"
     )
 
 
@@ -153,15 +162,15 @@ if __name__ == '__main__':
     print(
         "Fitness value of the best solution = {solution_fitness}".format(solution_fitness=best_solution_fitness))
 
-    adj_matrix = best_solution.reshape(NODES, NODES)
+    best_adj_matrix = best_solution.reshape(NODES, NODES)
 
     run.log(
-        {"adjacency_matrix": adj_matrix.flatten(),
-         "graph_figure": wandb.Image(draw_graph(adj_matrix=adj_matrix)),
+        {"adjacency_matrix": best_adj_matrix.flatten(),
+         "graph_figure": wandb.Image(draw_graph(adj_matrix=best_adj_matrix)),
          'best_fitness': best_solution_fitness})
 
     with open(args.adj_matrix_obj, 'wb') as fh:
-        pickle.dump(adj_matrix, fh)
+        pickle.dump(best_adj_matrix, fh)
 
     with open("wandb_run_id.txt", "w") as f:
         f.write(run.id)
