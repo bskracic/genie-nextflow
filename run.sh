@@ -1,10 +1,7 @@
 #!/bin/bash
 
-#cancers=('HNSC' 'KIRC' 'LGG')
 cancers=('SKCM')
-targets=('OS' 'GENDER' 'STAGE')
-#targets=('DSS')
-
+targets=('DSS' 'OS' 'GENDER' 'STAGE')
 for cancer in "${cancers[@]}"; do
     for target in "${targets[@]}"; do
       cmd="

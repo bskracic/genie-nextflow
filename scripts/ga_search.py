@@ -74,7 +74,7 @@ if __name__ == '__main__':
     # Initialize wandb
     wandb.login(key=args.wandb_api_key)
     run = wandb.init(
-        project="GENIE-Nextflow",
+        project="GENIE-Nextflow-v2",
         name=f'{str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))}_{args.cancers}' + f"_target_{args.target}",
         config={
             "cancers": args.cancers,
@@ -126,6 +126,7 @@ if __name__ == '__main__':
     def generation_finished(ga: pygad.GA):
         solution, fitness, _ = ga.best_solution()
         print('Generation fitness:', fitness)
+        run.log({'generation': ga.generations_completed, 'fitness': fitness})
 
 
     starting_flat_matrix = np.array(np.random.randint(2, size=(NODES, NODES)), dtype=float).flatten()
@@ -165,7 +166,7 @@ if __name__ == '__main__':
     best_adj_matrix = best_solution.reshape(NODES, NODES)
 
     run.log(
-        {"adjacency_matrix": best_adj_matrix.flatten(),
+        {"adjacency_matrix": [[int(x) for x in row] for row in best_adj_matrix],
          "graph_figure": wandb.Image(draw_graph(adj_matrix=best_adj_matrix)),
          'best_fitness': best_solution_fitness})
 

@@ -49,7 +49,7 @@ if __name__ == "__main__":
     with open("wandb_run_id.txt", "r") as f:
         run_id = f.read().strip()
     wandb.login(key=args.wandb_api_key)
-    run = wandb.init(id=run_id, resume="must", project='GENIE-Nextflow')
+    run = wandb.init(id=run_id, resume="must", project='GENIE-Nextflow-v2')
 
     def epoch_finished(epoch, tr_f1, tr_loss, f1, loss):
         run.log({"epoch": epoch, "train_f1": tr_f1, "train_loss": tr_loss, "f1": f1, "loss": loss})
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         run.log(
             {
                 "class": outputs[args.target][class_index],
-                "attributions": str(feature_importance),
+                "attributions": feature_importance.tolist(),
                 "feature_importance_graph": wandb.Image(fig, caption=outputs[args.target][class_index])
             })
 
