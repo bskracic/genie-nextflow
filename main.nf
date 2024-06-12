@@ -1,13 +1,11 @@
 params.genie_config_path = "${baseDir}/scripts/genie_config.json"
 params.target = "DSS"
 params.wandb_api_key = "7378d591fc5cde507d409f0b843f8c0b95a6969b"
-params.cancers = 'BRCA,LUAD'
+params.cancers = 'BRCA'
 
-def py_interpreter = "python3"
+def py_interpreter = "/home/jugo/anaconda3/envs/cgas-sting/bin/python3"
 
 process filterRows {
-
-    container 'bskracic/genie-runtime:latest'
 
     input:
     path genie_config_path
@@ -36,31 +34,15 @@ process generateDataset {
     """
 }
 
-process gaSearch {
-    input:
-    file "dataset.obj"
-    path genie_config_path
-
-    output:
-    file "adj_matrix.obj"
-    file "wandb_run_id.txt"
-
-    script:
-    """
-    ${py_interpreter} ${baseDir}/scripts/ga_search.py --genie_config=${params.genie_config_path} --cancers=${params.cancers} --dataset_obj=dataset.obj --adj_matrix_obj=adj_matrix.obj --wandb_api_key=${params.wandb_api_key} --target=${params.target}
-    """
-}
-
 process integrated_gradients {
     input:
-    file "wandb_run_id.txt"
-    file "adj_matrix.obj"
     file "dataset.obj"
+    file filtered_data_csv
     path genie_config_path
 
     script:
     """
-    ${py_interpreter} ${baseDir}/scripts/integrated_gradients.py --genie_config=${params.genie_config_path} --target=${params.target} --dataset_obj=dataset.obj --adj_matrix_obj=adj_matrix.obj --wandb_api_key=${params.wandb_api_key}
+    ${py_interpreter} ${baseDir}/scripts/ig_review.py --genie_config=${params.genie_config_path} --target=${params.target} --dataset_obj=dataset.obj --wandb_api_key=${params.wandb_api_key} --adj_matrix=${baseDir}/adj-matrix/${params.cancers}/${params.target}-adj-matrix.obj --target=${params.target} --cancer=${params.cancers} --input_csv=$filtered_data_csv
     """
 }
 
@@ -68,8 +50,5 @@ workflow {
     genie_config_path = channel.fromPath(params.genie_config_path)
     file = filterRows(genie_config_path)
     dataset = generateDataset(file, genie_config_path)
-    gaSearch(dataset, genie_config_path)
-    adj_matrix = gaSearch.out[0]
-    wandb_run_id_txt = gaSearch.out[1]
-    integrated_gradients(wandb_run_id_txt, adj_matrix, dataset, genie_config_path)
+    integrated_gradients(dataset, file, genie_config_path)
 }

@@ -46,10 +46,22 @@ if __name__ == "__main__":
     train_loader = DataListLoader(train_dataset, batch_size=64, shuffle=True)
     test_loader = DataListLoader(test_dataset, batch_size=64, shuffle=True)
 
-    with open("wandb_run_id.txt", "r") as f:
-        run_id = f.read().strip()
     wandb.login(key=args.wandb_api_key)
-    run = wandb.init(id=run_id, resume="must", project='GENIE-Nextflow-v2')
+    run = wandb.init(
+        project="GENIE-Nextflow-v2",
+        name=f'{args.cancers}_target_{args.target}',
+        config={
+            "cancers": args.cancers,
+            'variable': args.target,
+            "learning_rate": LR,
+            "wd": WD,
+            "hidden_size": HIDDEN_SIZE,
+            "architecture": "GCN",
+            "nodes": NODES,
+            "genes": config['genes'],
+            "epochs": EPOCHS,
+        }
+    )
 
     def epoch_finished(epoch, tr_f1, tr_loss, f1, loss):
         run.log({"epoch": epoch, "train_f1": tr_f1, "train_loss": tr_loss, "f1": f1, "loss": loss})
@@ -75,7 +87,32 @@ if __name__ == "__main__":
         'GENDER': ['gender_female', 'gender_male']
     }
 
+    if torch.cuda.is_available():
+        print("CUDA is available! PyTorch is using GPU acceleration.")
+        device = "cuda:1"
+    else:
+        print("CUDA is not available. PyTorch is using CPU.")
+        device = "cpu"
+
     for class_index in range(NUM_CLASSES):
+
+        total_attributions = []
+        indices = np.where(Y == label)[0]
+        Y_filtered = Y[indices]
+        X_filtered = X[indices, :, :]
+
+        X_filtered = torch.tensor(X_filtered, dtype=torch.float32).to(device)
+        Y_filtered = torch.tensor(Y_filtered, dtype=torch.long).to(device)
+        
+        for i, (inputs, labels) in tqdm(enumerate(train_loader), total=len(train_loader),position=0, leave=False):
+            integrated_gradients = IntegratedGradients(model)
+            attributions, _ = integrated_gradients.attribute(inputs, target=labels, return_convergence_delta=True)
+            attributions = attributions.squeeze().cpu().numpy()
+            total_attributions.append(np.abs(attributions))
+
+        mean_values = np.mean(total_attributions, axis=0)
+
+
         ig = IntegratedGradients(model)
         first_batch = train_loader.__iter__().__next__()
         attributions, _ = ig.attribute(inputs=first_batch[0].x.unsqueeze(-1), target=class_index,
