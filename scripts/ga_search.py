@@ -74,7 +74,7 @@ if __name__ == '__main__':
     # Initialize wandb
     wandb.login(key=args.wandb_api_key)
     run = wandb.init(
-        project="GENIE-Nextflow-v2",
+        project="GENIE-Nextflow-v3",
         name=f'{str(datetime.now().strftime("%Y-%m-%d-%H:%M:%S"))}_{args.cancers}' + f"_target_{args.target}",
         config={
             "cancers": args.cancers,
@@ -90,19 +90,16 @@ if __name__ == '__main__':
     )
 
 
-    # Use CUDA
-    # if torch.cuda.is_available():
-    #     torch.set_default_device('cuda')
 
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     def epoch_finished(epoch, tr_f1, tr_loss, f1, loss):
         pass
-
 
     def fitness_function(ga: pygad.GA, solution, index):
         adj_matrix = solution.reshape(ADJ_MATRIX_SHAPE)
         model = GraphConvolutionalNetwork(num_node_features=1, num_nodes=NODES, num_classes=NUM_CLASSES,
                                           hidden_channels=HIDDEN_SIZE,
-                                          adj_matrix=adj_matrix)
+                                          adj_matrix=adj_matrix, device=device).to(device)
         # model.to('cuda:0')
         optimizer = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
         trainer = GCNModelTrainer(model=model, optimizer=optimizer, criterion=criterion,
@@ -110,15 +107,6 @@ if __name__ == '__main__':
 
         final_f1 = trainer.train(train_loader=train_loader, test_loader=test_loader, on_epoch_finished=epoch_finished)
         print(' =>', final_f1)
-        # if final_f1 < 0.8:
-        #     return final_f1
-        # return 0.8 * final_f1 + 0.2 * (1 / solution.sum())
-
-        # if solution.sum() > NODES:
-        #     return 0
-        # else:
-        #     return final_f1
-        # return 1 / solution.sum()
 
         return final_f1
 

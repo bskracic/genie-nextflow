@@ -14,49 +14,49 @@
     "IL6",
     "IL8"
   ],
-  "survival_data_path": "/home/jugo/research/genie-nextflow/resources/TCGA_survival_data_clean.txt",
+  "survival_data_path": "/home/bskracic/research/genie-nextflow/resources/TCGA_survival_data_clean.txt",
   "cancers": {
     "BRCA": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/BRCA_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/BRCA_expression.csv"
     },
     "LUAD": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/LUAD_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/LUAD_expression.csv"
     },
     "GBMLGG": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/GBMLGG_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/GBMLGG_expression.csv"
     },
     "KIRC": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/KIRC_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/KIRC_expression.csv"
     },
     "LUNG": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/LUNG_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/LUNG_expression.csv"
     },
     "THCA": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/THCA_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/THCA_expression.csv"
     },
     "HNSC": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/HNSC_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/HNSC_expression.csv"
     },
     "LUSC": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/LUSC_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/LUSC_expression.csv"
     },
     "PRAD": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/PRAD_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/PRAD_expression.csv"
     },
     "LGG": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/LGG_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/LGG_expression.csv"
     },
     "SKCM": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/SKCM_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/SKCM_expression.csv"
     },
     "STAD": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/STAD_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/STAD_expression.csv"
     },
     "BLCA": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/BLCA_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/BLCA_expression.csv"
     },
     "COADREAD": {
-      "expression": "/home/jugo/research/genie-nextflow/resources/COADRED_expression.csv"
+      "expression": "/home/bskracic/research/genie-nextflow/resources/COADRED_expression.csv"
     }
   }
 }

@@ -16,7 +16,6 @@ import wandb
 from genie_utils import load_config
 from gcn import GraphConvolutionalNetwork, GCNModelTrainer
 
-
 outputs: dict = {
     'STAGE': ['early', 'late'],
     'DSS': ['DSS_1', 'DSS_0'],
@@ -29,7 +28,6 @@ WD = 1e-1
 HIDDEN_SIZE = 64
 EPOCHS = 100
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Compute IG attributions for each problem')
     parser.add_argument('--genie_config', required=True, help='Genie json configuration file')
@@ -39,14 +37,19 @@ if __name__ == "__main__":
     parser.add_argument('--dataset_obj', required=True, help='Input pickle object file')
     parser.add_argument('--input_csv', required=True, help='Input dataset csv file')
     parser.add_argument('--adj_matrix', required=True, help='Input adjacency matrix object file')
+    # parser.add_argument('--wandb_run_id', required=True, help='W&B run id to resume')
     args = parser.parse_args()
+
+    # with open("wandb_run_id.txt", "r") as f:
+    #     run_id = f.read().strip()
+    # wandb.login(key=args.wandb_api_key)
+    # run = wandb.init(id=run_id, resume="must", project='GENIE-Nextflow-v3')
 
     with open(args.dataset_obj, 'rb') as fh:
         dataset = pickle.load(fh)
 
     with open(args.adj_matrix, 'rb') as fh:
-        adj_matrix = pickle.load(fh)
-
+        adj_matrix: list[list[int]] = pickle.load(fh)
 
     target = args.target
     cancer = args.cancers
@@ -57,23 +60,6 @@ if __name__ == "__main__":
     ADJ_MATRIX_SHAPE = (NODES, NODES)
     NUM_CLASSES = dataset[0].y.shape[-1]
 
-    wandb.login(key=args.wandb_api_key)
-    run = wandb.init(
-        project="GENIE-Nextflow-IG-Reruns",
-        name=f'{cancer}_{target}',
-        config={
-            "cancers": args.cancers,
-            'variable': args.target,
-            "learning_rate": LR,
-            "wd": WD,
-            "hidden_size": HIDDEN_SIZE,
-            "architecture": "GCN",
-            "nodes": NODES,
-            "genes": config['genes'],
-            "epochs": EPOCHS,
-        }
-    )
-
     split_idx = round(0.75 * len(dataset))
     train_dataset = dataset[:split_idx]
     test_dataset = dataset[split_idx:]
@@ -81,22 +67,32 @@ if __name__ == "__main__":
     train_loader = DataListLoader(train_dataset, batch_size=64, shuffle=True)
     test_loader = DataListLoader(test_dataset, batch_size=64, shuffle=True)
 
-    model = GraphConvolutionalNetwork(num_node_features=1, num_nodes=NODES, num_classes=NUM_CLASSES, hidden_channels=HIDDEN_SIZE,
-                                      adj_matrix=adj_matrix)
+    device = 'cpu'
+    if torch.cuda.is_available():
+        print(f'CUDA found, using {torch.cuda.get_device_name("cuda:0")}')
+        device = 'cuda:0'
+
+    model = GraphConvolutionalNetwork(num_node_features=1, num_nodes=NODES, num_classes=NUM_CLASSES,
+                                      hidden_channels=HIDDEN_SIZE,
+                                      adj_matrix=adj_matrix, device=device).to(device)
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
     trainer = GCNModelTrainer(model=model, optimizer=optimizer, criterion=criterion,
                               num_classes=NUM_CLASSES, epochs=EPOCHS)
     print('training started')
     pbar = tqdm(total=EPOCHS, desc="Training Progress")
+
     def epoch_finished(epoch, tr_f1, tr_loss, f1, loss):
-        run.log({"epoch": epoch, "train_f1": tr_f1, "train_loss": tr_loss, "f1": f1, "loss": loss})
+        # print({"epoch": epoch, "train_f1": tr_f1, "train_loss": tr_loss, "f1": f1, "loss": loss})
         pbar.update(1)
         pass
+
+
     final_f1 = trainer.train(train_loader=train_loader, test_loader=test_loader, on_epoch_finished=epoch_finished)
-    run.log({"f1": final_f1})
+    print({"f1": final_f1})
     print('\nfinished')
     pbar.close()
+
 
     def draw_graph(attrs):
         cmap = plt.cm.RdPu
@@ -129,19 +125,19 @@ if __name__ == "__main__":
         total_attributions = []
         for i, sample in tqdm(enumerate(temp_dataset), total=len(temp_dataset), position=0, leave=False):
             integrated_gradients = IntegratedGradients(model)
-            attributions = integrated_gradients.attribute(inputs=sample.x.unsqueeze(-1), target=class_index)
-            attributions = attributions.squeeze().numpy()
+            attributions = integrated_gradients.attribute(inputs=sample.x.unsqueeze(-1).cuda(), target=class_index)
+            attributions = attributions.squeeze().cpu().numpy()
             total_attributions.append(np.abs(attributions))
 
         feature_importance = np.mean(total_attributions, axis=0)
-        
+
         print(outputs[target][class_index], ':', feature_importance)
         fig = draw_graph([math.log10(val + 10) for val in feature_importance])
-        run.log(
+        print(
             {
                 "class": outputs[args.target][class_index],
                 "attributions": feature_importance.tolist(),
                 "feature_importance_graph": wandb.Image(fig, caption=outputs[args.target][class_index])
             })
-        
-    run.finish()
+
+    # run.finish()

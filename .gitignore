@@ -43,3 +43,6 @@ nextflow-logs*
 dumps
 cohorts
 wandb
+graphs
+tmp
+adj-matrix
