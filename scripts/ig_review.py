@@ -37,13 +37,13 @@ if __name__ == "__main__":
     parser.add_argument('--dataset_obj', required=True, help='Input pickle object file')
     parser.add_argument('--input_csv', required=True, help='Input dataset csv file')
     parser.add_argument('--adj_matrix', required=True, help='Input adjacency matrix object file')
-    # parser.add_argument('--wandb_run_id', required=True, help='W&B run id to resume')
+    parser.add_argument('--wandb_run_id', required=True, help='W&B run id to resume')
     args = parser.parse_args()
 
-    # with open("wandb_run_id.txt", "r") as f:
-    #     run_id = f.read().strip()
-    # wandb.login(key=args.wandb_api_key)
-    # run = wandb.init(id=run_id, resume="must", project='GENIE-Nextflow-v3')
+    with open("wandb_run_id.txt", "r") as f:
+        run_id = f.read().strip()
+    wandb.login(key=args.wandb_api_key)
+    run = wandb.init(id=run_id, resume="must", project='GENIE-Nextflow-v3')
 
     with open(args.dataset_obj, 'rb') as fh:
         dataset = pickle.load(fh)
